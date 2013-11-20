@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using EnvDTE;
 using Microsoft.VisualStudio.Editor;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -22,6 +23,7 @@ namespace Anonymous.ClangFormat
     public sealed class ClangFormatPackage : Package
     {
         public DocumentEventListener docEventListener_;
+        private DTE _ide;
 
         #region Package Members
         protected override void Initialize()
@@ -40,33 +42,27 @@ namespace Anonymous.ClangFormat
 
             docEventListener_ = new DocumentEventListener(this);
             docEventListener_.BeforeSave += OnBeforeDocumentSave;
-            docEventListener_.StartListen();
         }
 
         protected override void Dispose(bool disposing)
         {
-            lock (this)
+            base.Dispose(disposing);
+            if (docEventListener_ != null)
             {
-                if (disposing)
-                {
-                    if (docEventListener_ != null)
-                    {
-                        docEventListener_.BeforeSave -= OnBeforeDocumentSave;
-                        docEventListener_.EndListen();
-                        docEventListener_ = null;
-                    }
-                    GC.SuppressFinalize(this);
-                }
-                base.Dispose(disposing);
+                docEventListener_.Dispose();
             }
         }
         #endregion
+
+        public DTE IDE
+        {
+            get { return _ide ?? (_ide = (DTE)GetService(typeof(DTE))); }
+        }
 
         private void MenuItemCallback(object sender, EventArgs e)
         {
             IWpfTextView view = GetCurrentView();
             if (view == null)
-                // We're not in a text view.
                 return;
 
             int start = view.Selection.Start.Position.GetContainingLine().Start.Position;
@@ -76,11 +72,10 @@ namespace Anonymous.ClangFormat
 
         private void OnBeforeDocumentSave(object source, OnBeforeSaveArgs args)
         {
-            if (GetFormatOnSaveOption())
+            if (((OptionPageGrid)GetDialogPage(typeof(OptionPageGrid))).FormatOnSave)
             {
                 IWpfTextView view = GetCurrentView();
                 if (view == null)
-                    // We're not in a text view.
                     return;
 
                 FormatSelection(view);
@@ -146,12 +141,12 @@ namespace Anonymous.ClangFormat
 
         private void FormatSelection(IWpfTextView view, int start = 0, int length = -1)
         {
-            if (length == 0)
-                return;
-
             string text = view.TextBuffer.CurrentSnapshot.GetText();
             if (length == -1)
                 length = text.Length;
+
+            if (length == 0)
+                return;
 
             // clang-format doesn't support formatting a range that starts at the end
             // of the file.
@@ -207,13 +202,13 @@ namespace Anonymous.ClangFormat
             Guid guidWpfViewHost = DefGuidList.guidIWpfTextViewHost;
             object host;
             userData.GetData(ref guidWpfViewHost, out host);
-            return ((IWpfTextViewHost)host).TextView;
-        }
 
-        bool GetFormatOnSaveOption()
-        {
-            var page = (OptionPageGrid)GetDialogPage(typeof(OptionPageGrid));
-            return page.FormatOnSave;
+            IWpfTextViewHost viewHost = (IWpfTextViewHost)host;
+            string language = viewHost.TextView.TextDataModel.ContentType.TypeName;
+            if (language != "C/C++")
+                return null;
+
+            return viewHost.TextView;
         }
 
         private string GetDocumentParent(IWpfTextView view)

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using EnvDTE;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -7,38 +9,29 @@ namespace Anonymous.ClangFormat
 {
     public class OnBeforeSaveArgs : EventArgs
     {
-        public uint DocCookie { get; set; }
-        public OnBeforeSaveArgs(uint docCookie)
+        public Document Document { get; set; }
+        public OnBeforeSaveArgs(Document document)
         {
-            DocCookie = docCookie;
+            Document = document;
         }
     }
 
-    public class DocumentEventListener: IVsRunningDocTableEvents3
+    public class DocumentEventListener : IDisposable, IVsRunningDocTableEvents3
     {
+        private ClangFormatPackage package_;
         private RunningDocumentTable table_;
         private uint cookie_;
+        private bool is_disposed_;
 
         public delegate void OnBeforeSaveHandler(object sender, OnBeforeSaveArgs e);
         public event OnBeforeSaveHandler BeforeSave;
 
-        public DocumentEventListener(IServiceProvider package)
+        public DocumentEventListener(ClangFormatPackage package)
         {
+            is_disposed_ = false;
+            package_ = package;
             table_ = new RunningDocumentTable(package);
-        }
-
-        public void StartListen()
-        {
             cookie_ = table_.Advise(this);
-        }
-
-        public void EndListen()
-        {
-            if (cookie_ != 0)
-            {
-                table_.Unadvise(cookie_);
-                cookie_ = 0;
-            }
         }
 
         public int OnAfterAttributeChange(uint docCookie, uint grfAttribs)
@@ -76,13 +69,42 @@ namespace Anonymous.ClangFormat
             return VSConstants.S_OK;
         }
 
+        private Document GetDocumentFromCookie(uint docCookie)
+        {
+            // Retrieve document information from the cookie to get the full document name.
+            var documentName = table_.GetDocumentInfo(docCookie).Moniker;
+
+            // Search against the IDE documents to find the object that matches the full document name.
+            return package_.IDE.Documents.OfType<Document>().FirstOrDefault(x => x.FullName == documentName);
+        }
+
         public int OnBeforeSave(uint docCookie)
         {
             if (BeforeSave != null)
             {
-                BeforeSave(this, new OnBeforeSaveArgs(docCookie));
+                Document document = GetDocumentFromCookie(docCookie);
+                BeforeSave(this, new OnBeforeSaveArgs(document));
             }
             return VSConstants.S_OK;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!is_disposed_)
+            {
+                is_disposed_ = true;
+                if (disposing && table_ != null && cookie_ != 0)
+                {
+                    table_.Unadvise(cookie_);
+                    cookie_ = 0;
+                }
+            }
         }
     }
 }
