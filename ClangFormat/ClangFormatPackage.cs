@@ -70,7 +70,7 @@ namespace Anonymous.ClangFormat
             FormatSelection(view, start, end - start);
         }
 
-        private void OnBeforeDocumentSave(object source, OnBeforeSaveArgs args)
+        private void OnBeforeDocumentSave(object source, EventArgs args)
         {
             if (((OptionPageGrid)GetDialogPage(typeof(OptionPageGrid))).FormatOnSave)
             {
