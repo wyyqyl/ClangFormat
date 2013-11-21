@@ -32,12 +32,17 @@ namespace Anonymous.ClangFormat
 
             // Add our command handlers for menu (commands must exist in the .vsct file)
             OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if ( null != mcs )
+            if (null != mcs)
             {
-                // Create the command for the menu item.
-                CommandID menuCommandID = new CommandID(GuidList.guidClangFormatCmdSet, (int)PkgCmdIDList.cmdidClangFormat);
-                MenuCommand menuItem = new MenuCommand(MenuItemCallback, menuCommandID );
-                mcs.AddCommand( menuItem );
+                CommandID menuCommandID = new CommandID(GuidList.guidClangFormatCmdSet, (int)PkgCmdIDList.cmdidFormatSelection);
+                OleMenuCommand menuItem = new OleMenuCommand(FormatSelectionCallback, menuCommandID);
+                menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+                mcs.AddCommand(menuItem);
+
+                menuCommandID = new CommandID(GuidList.guidClangFormatCmdSet, (int)PkgCmdIDList.cmdidFormatDocument);
+                menuItem = new OleMenuCommand(FormatDocumentCallback, menuCommandID);
+                menuItem.BeforeQueryStatus += OnBeforeQueryStatus;
+                mcs.AddCommand(menuItem);
             }
 
             docEventListener_ = new DocumentEventListener(this);
@@ -59,7 +64,7 @@ namespace Anonymous.ClangFormat
             get { return _ide ?? (_ide = (DTE)GetService(typeof(DTE))); }
         }
 
-        private void MenuItemCallback(object sender, EventArgs e)
+        private void FormatSelectionCallback(object sender, EventArgs e)
         {
             IWpfTextView view = GetCurrentView();
             if (view == null)
@@ -68,6 +73,29 @@ namespace Anonymous.ClangFormat
             int start = view.Selection.Start.Position.GetContainingLine().Start.Position;
             int end = view.Selection.End.Position.GetContainingLine().End.Position;
             FormatSelection(view, start, end - start);
+        }
+
+        private void FormatDocumentCallback(object sender, EventArgs e)
+        {
+            IWpfTextView view = GetCurrentView();
+            if (view == null)
+                return;
+
+            FormatSelection(view);
+        }
+
+        private void OnBeforeQueryStatus(object sender, EventArgs e)
+        {
+            OleMenuCommand cmd = (OleMenuCommand)sender;
+            if (GetCurrentView() == null)
+            {
+                cmd.Visible = false;
+            }
+            else
+            {
+                cmd.Visible = true;
+            }
+            cmd.Enabled = cmd.Visible;
         }
 
         private void OnBeforeDocumentSave(object source, EventArgs args)
