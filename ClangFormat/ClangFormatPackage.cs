@@ -1,16 +1,21 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Globalization;
+using System.Runtime.InteropServices;
 using System.ComponentModel.Design;
+using Microsoft.Win32;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.Shell;
+using EnvDTE;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Xml.Linq;
-using EnvDTE;
-using Microsoft.VisualStudio.Editor;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Text;
-using Microsoft.VisualStudio.Text.Editor;
 using Microsoft.VisualStudio.TextManager.Interop;
+using Microsoft.VisualStudio.Text.Editor;
+using System.Xml.Linq;
+using Microsoft.VisualStudio.Editor;
+using Microsoft.VisualStudio.Text;
 
 namespace Anonymous.ClangFormat
 {

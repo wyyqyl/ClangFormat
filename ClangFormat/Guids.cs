@@ -6,8 +6,8 @@ namespace Anonymous.ClangFormat
 {
     static class GuidList
     {
-        public const string guidClangFormatPkgString = "f8111347-1024-4a99-b2b0-e0271fb5b5f5";
-        public const string guidClangFormatCmdSetString = "d0231aba-fe3a-4d06-9213-5000ef99ca08";
+        public const string guidClangFormatPkgString = "bff0e311-a5e8-45fb-9eca-aba2a1f6b075";
+        public const string guidClangFormatCmdSetString = "f35d3c3c-7506-4857-92e6-031f83e82f6f";
 
         public static readonly Guid guidClangFormatCmdSet = new Guid(guidClangFormatCmdSetString);
     };

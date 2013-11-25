@@ -20,6 +20,11 @@
   <!--This header contains the command ids for the menus provided by the shell. -->
   <Extern href="vsshlids.h"/>
 
+  <!--Definition of some VSCT specific constants. In this sample we use it for the IDs inside the guidOfficeIcon group. -->
+  <Extern href="msobtnid.h"/>
+
+
+
 
   <!--The Commands section is where we the commands, menus and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
@@ -38,9 +43,13 @@
          group as the part of a menu contained between two lines. The parent of a group 
          must be a menu. -->
     <Groups>
+
       <Group guid="guidClangFormatCmdSet" id="ClangFormatMenuGroup" priority="0x0600">
         <Parent guid="guidStdEditor" id="IDM_VS_EDITOR_ADVANCED_MENU"/>
       </Group>
+      
+
+
     </Groups>
     
     <!--Buttons section. -->
@@ -53,50 +62,75 @@
           You can add more than one CommandFlag node e.g.:
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
-          If you do not want an image next to your command, remove the Icon node /> -->
+          If you do not want an image next to your command, remove the Icon node or set it to <Icon guid="guidOfficeIcon" id="msotcidNoIcon" /> -->
 
-      <Button guid="guidClangFormatCmdSet" id="cmdidFormatSelection" priority="0x0100" type="Button">
+      <Button guid="guidClangFormatCmdSet" id="cmdidFormatDocument" priority="0x0100" type="Button">
         <Parent guid="guidClangFormatCmdSet" id="ClangFormatMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic1" />
         <CommandFlag>DefaultInvisible</CommandFlag>
         <CommandFlag>DefaultDisabled</CommandFlag>
         <CommandFlag>DynamicVisibility</CommandFlag>
         <Strings>
-          <ButtonText>Format Selection (Clang)</ButtonText>
-        </Strings>
-      </Button>
-      <Button guid="guidClangFormatCmdSet" id="cmdidFormatDocument" priority="0x0110" type="Button">
-        <Parent guid="guidClangFormatCmdSet" id="ClangFormatMenuGroup" />
-        <CommandFlag>DefaultInvisible</CommandFlag>
-        <CommandFlag>DefaultDisabled</CommandFlag>
-        <CommandFlag>DynamicVisibility</CommandFlag>
-        <Strings>
+          <CommandName>cmdidFormatDocument</CommandName>
           <ButtonText>Format Document (Clang)</ButtonText>
         </Strings>
       </Button>
+      <Button guid="guidClangFormatCmdSet" id="cmdidFormatSelection" priority="0x0110" type="Button">
+        <Parent guid="guidClangFormatCmdSet" id="ClangFormatMenuGroup" />
+        <Icon guid="guidImages" id="bmpPic2" />
+        <CommandFlag>DefaultInvisible</CommandFlag>
+        <CommandFlag>DefaultDisabled</CommandFlag>
+        <CommandFlag>DynamicVisibility</CommandFlag>
+        <Strings>
+          <CommandName>cmdidFormatSelection</CommandName>
+          <ButtonText>Format Selection (Clang)</ButtonText>
+        </Strings>
+      </Button>
+
 
     </Buttons>
+   
+    <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
+    <Bitmaps>
+      <!--  The bitmap id is defined in a way that is a little bit different from the others: 
+            the declaration starts with a guid for the bitmap strip, then there is the resource id of the 
+            bitmap strip containing the bitmaps and then there are the numeric ids of the elements used 
+            inside a button definition. An important aspect of this declaration is that the element id 
+            must be the actual index (1-based) of the bitmap inside the bitmap strip. -->
+      <Bitmap guid="guidImages" href="Resources\Images.png" usedList="bmpPic1, bmpPic2, bmpPicSearch, bmpPicX, bmpPicArrows"/>
+
+    </Bitmaps>
  
   </Commands>
 
 
   <KeyBindings>
-    <KeyBinding guid="guidClangFormatCmdSet" id="cmdidFormatSelection" editor="guidTextEditor" key1="M" mod1="Control" key2="F" mod2="Control"/>
     <KeyBinding guid="guidClangFormatCmdSet" id="cmdidFormatDocument" editor="guidTextEditor" key1="M" mod1="Control" key2="D" mod2="Control"/>
+    <KeyBinding guid="guidClangFormatCmdSet" id="cmdidFormatSelection" editor="guidTextEditor" key1="M" mod1="Control" key2="F" mod2="Control"/>
   </KeyBindings>
 
 
   <Symbols>
     <!-- This is the package guid. -->
-    <GuidSymbol name="guidClangFormatPkg" value="{f8111347-1024-4a99-b2b0-e0271fb5b5f5}" />
+    <GuidSymbol name="guidClangFormatPkg" value="{bff0e311-a5e8-45fb-9eca-aba2a1f6b075}" />
     
     <!-- This is the guid used to group the menu commands together -->
-    <GuidSymbol name="guidClangFormatCmdSet" value="{d0231aba-fe3a-4d06-9213-5000ef99ca08}">
+    <GuidSymbol name="guidClangFormatCmdSet" value="{f35d3c3c-7506-4857-92e6-031f83e82f6f}">
+
       <IDSymbol name="ClangFormatMenuGroup" value="0x1020" />
-      <IDSymbol name="cmdidFormatSelection" value="0x0100" />
-      <IDSymbol name="cmdidFormatDocument" value="0x0110" />
+      <IDSymbol name="cmdidFormatDocument" value="0x0100" />
+      <IDSymbol name="cmdidFormatSelection" value="0x0110" />
     </GuidSymbol>
 
     <GuidSymbol name="guidTextEditor" value="{8B382828-6202-11d1-8870-0000F87579D2}" />
+
+    <GuidSymbol name="guidImages" value="{19b17521-3227-4069-ba8e-423b61b72934}" >
+      <IDSymbol name="bmpPic1" value="1" />
+      <IDSymbol name="bmpPic2" value="2" />
+      <IDSymbol name="bmpPicSearch" value="3" />
+      <IDSymbol name="bmpPicX" value="4" />
+      <IDSymbol name="bmpPicArrows" value="5" />
+    </GuidSymbol>
   </Symbols>
 
 </CommandTable>
