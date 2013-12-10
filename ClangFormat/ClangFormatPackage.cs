@@ -124,7 +124,7 @@ namespace Anonymous.ClangFormat
         {
             System.Diagnostics.Process process = new System.Diagnostics.Process();
             process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\Resources\clang-format.exe";
+            process.StartInfo.FileName = Path.GetDirectoryName(typeof(ClangFormatPackage).Assembly.Location) + @"\Resources\clang-format.exe";
 
             var page = (OptionPageGrid)GetDialogPage(typeof(OptionPageGrid));
             // Poor man's escaping - this will not work when quotes are already escaped
